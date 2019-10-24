@@ -89,6 +89,8 @@ RE = Reynolds(cruiseVel, C, airDensity, airDynVis, 3);
 uniqRe = unique(RE(~isnan(RE)));
 
 
+
+
 %%%
 % Preallocate for the Airfoil objects and the references for the parallel
 % threads.
@@ -96,11 +98,15 @@ airfoils(length(uniqRe)) = AirfoilDataT();
 futures(length(uniqRe)) = parallel.FevalFuture();
 
 %%%
+% Method based on parfeval, parfeval seems to not work with
+% handles.
+% 
+%%%
 % Queue up the AirfoilDataT to be created for each Reynolds number on the
 % parallel pool. Currently using .1 degree increments for the airfoil data.
 for idx = 1:length(uniqRe)
     fprintf("Queueing %s at Re%g, M%g\n", afName, uniqRe(idx), cruiseVel/a);
-    futures(idx) = parfeval(pool, @createAirfoil, afName, uniqRe(idx), cruiseVel/a, .1);
+    futures(idx) = parfeval(pool, @createAirfoil, 1, afName, uniqRe(idx), cruiseVel/a, .1);
 end
 
 %%%
@@ -112,15 +118,26 @@ for idx = 1:length(futures)
 end
 
 %%%
+% Method based on parfor seems not to print status correctly
+%
+% parfor idx = 1:length(uniqRe)
+%     fprintf("Queueing %s at Re%g, M%g\n", afName, uniqRe(idx), cruiseVel/a);
+%     airfoils(idx) = createAirfoil(afName, uniqRe(idx), cruiseVel/a, .1);
+%     fprintf("Completed %s at Re%g, M%g\n", value.name, value.Re, value.mach);
+% end
+    
+
+%%%
 % Then, each point in the C grid is mapped to the appropriate airfoil in
 % |airfoils|. This step will help with slicing the array for parallel
 % processing. Since |AirfoilDataT| is a handle object, there will be very
 % little extra memory spent due to this action.
 
-afGrid = nan(size(RE));
+    afGrid(size(RE)) = AirfoilDataT();
 
-for idx = 1:length(afGrid(:))
-    afGrid(idx) = airfoils(find(uniqRe == RE(idx), 1));
+for idx = 1:length(RE(:))
+    [row, col] = ind2sub(size(RE), idx);
+    afGrid(row, col) = airfoils(find(uniqRe == RE(idx), 1));
 end
 
 %% Calculate Performance on each Wing
@@ -135,11 +152,13 @@ parfor idx = 1:length(C(:))
         currAf = afGrid(idx);
         [aoa, L, D, E, M] = wingPerf(wing, currAf, cruiseVel, airDensity, CLadjuster, aoaAdjuster);
         selIdx = feval(aoaSelector, aoa, L, D, E, M, weight, wing, currAf);
-        Lgrid(idx) = L(selIdx);
-        Dgrid(idx) = D(selIdx);
-        Egrid(idx) = E(selIdx);
-        Mgrid(idx) = M(selIdx);
-        aoaGrid(idx) = aoa(selIdx);
+        if(selIdx)
+            Lgrid(idx) = L(selIdx);
+            Dgrid(idx) = D(selIdx);
+            Egrid(idx) = E(selIdx);
+            Mgrid(idx) = M(selIdx);
+            aoaGrid(idx) = aoa(selIdx);
+        end
     end
 end
 
@@ -181,7 +200,7 @@ Mopt = Mgrid(optIdx);
 % graphs. Find x and y limits. Create figure, then add a name and set the size.
 
 shading interp
-addpath(fullfile(".", "suplabel"))
+addpath(replace(which('optimizeWing.m'), filesep+"optimizeWing.m", filesep+"suplabel"+filesep))
 xl = [min(C(:)), max(C(:))];
 yl = [min(B(:)), max(B(:))];
 fig = figure;
@@ -199,11 +218,11 @@ xlim(xl);
 ylim(yl);
 colorbar
 hold on
-plot(copt, bopt, 'bx');
-contour(crange, brange, Lgrid, 'LineColor', 'black', 'LineStyle', '-.', 'LevelStep', 1);
+plot(copt, bopt, 'kx');
+contour(crange, brange, Lgrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
 hold off
 
-ax(2) = subplot(4,4,3);
+ax(2) = subplot(4,3,3);
 [~, c] = contourf(crange, brange, Dgrid, 1000);
 c.LineColor = 'none';
 title('Drag');
@@ -211,11 +230,11 @@ xlim(xl);
 ylim(yl);
 colorbar
 hold on
-plot(copt, bopt, 'bx');
-contour(crange, brange, Dgrid, 'LineColor', 'black', 'LineStyle', '-.', 'LevelStep', 1);
+plot(copt, bopt, 'kx');
+contour(crange, brange, Dgrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
 hold off
 
-ax(3) = subplot(4,4,8);
+ax(3) = subplot(4,3,6);
 [~, c] = contourf(crange, brange, Egrid, 1000);
 c.LineColor = 'none';
 title('L/D');
@@ -223,8 +242,8 @@ xlim(xl);
 ylim(yl);
 colorbar
 hold on
-plot(copt, bopt, 'bx');
-contour(crange, brange, Egrid, 'LineColor', 'black', 'LineStyle', '-.', 'LevelStep', 1);
+plot(copt, bopt, 'kx');
+contour(crange, brange, Egrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
 hold off
 
 ax(4) = subplot(2,2,3);
@@ -235,8 +254,8 @@ xlim(xl);
 ylim(yl);
 colorbar
 hold on
-plot(copt, bopt, 'bx');
-contour(crange, brange, Mgrid, 'LineColor', 'black', 'LineStyle', '-.', 'LevelStep', 1);
+plot(copt, bopt, 'kx');
+contour(crange, brange, Mgrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
 hold off
 
 ax(5) = subplot(2,2,4);
@@ -247,8 +266,8 @@ xlim(xl);
 ylim(yl);
 colorbar
 hold on
-plot(copt, bopt, 'bx');
-contour(crange, brange, aoaGrid, 'LineColor', 'black', 'LineStyle', '-.', 'LevelStep', 1);
+plot(copt, bopt, 'kx');
+contour(crange, brange, aoaGrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
 hold off
 
 suplabel(char(sprintf("Airfoil: '%s'", afName)), 't');

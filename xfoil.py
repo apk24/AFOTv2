@@ -33,7 +33,7 @@ debug = bool(int(sys.argv[8]))
 if debug:
 	log.basicConfig(level=log.DEBUG, filemode='a', filename="xfoil.py.log", format="{%(process)s}::[%(asctime)s]::%(levelname)s:\t%(message)s")
 else:
-	log.basicConfig(level=log.WARNING, filemode='a', filename="xfoil.py.log", format="{%(process)s}::[%(asctime)s]::%(levelname)s:\t%(message)s")
+	log.basicConfig(level=log.INFO, filemode='a', filename="xfoil.py.log", format="{%(process)s}::[%(asctime)s]::%(levelname)s:\t%(message)s")
 
 def xfrange(start, stop, step):
 	if(start <= stop):
@@ -52,6 +52,8 @@ ps = sp.Popen(['xfoil.exe'],
 			stdin=sp.PIPE,
 			stdout=(None if debug else sp.DEVNULL),
 			stderr=None)
+
+log.info("PID of child process is " + str(ps.pid))
 
 def issueCmd(cmd,echo=debug):
 	#(outpt, err) = ps.communicate((cmd + "\r\n").encode('utf-8'))

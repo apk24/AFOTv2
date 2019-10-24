@@ -1,9 +1,9 @@
 function [aoa, L, D, E, M] = wingPerf(wing, airfoil, vinf, rho, CLadjuster, aoaAdjuster)
 
 try
-    rawAoa = airfoil.data(:,1);
-    [~, minInd] = min(rawAoa);
-    [~, maxInd] = max(rawAoa); 
+    rawCL = airfoil.data(:,2);
+    [~, minInd] = min(rawCL);
+    [~, maxInd] = max(rawCL); 
     aoa = airfoil.data(minInd:maxInd,1) + aoaAdjuster(wing, airfoil, vinf, rho);
     cl = airfoil.data(minInd:maxInd,2);
     cd0 = airfoil.data(minInd:maxInd,3);

@@ -44,8 +44,8 @@ headings=["Chord"; "Span"; "AR"; "AoA"; "Lift"; "Drag"; "E"; "Moment"];
 
 %%%
 % Variable to store results of optimizations on individual airfoils
-data = zeros(length(AF), length(headings));
-figs = gobjects(length(AF));
+data = zeros(length(afNames), length(headings));
+figs = gobjects(length(afNames));
 
 %%%
 % Variable for the parallel pool in use.
@@ -130,5 +130,6 @@ if(~isempty(errors))
     end
     throw(ME)
 end
+delete *.log
 end
     
