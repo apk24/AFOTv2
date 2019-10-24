@@ -1,3 +1,7 @@
+########################################
+####		GitKraken Generated		####
+########################################
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -56,3 +60,19 @@ docs/_build/
 
 # PyBuilder
 target/
+
+
+####################################
+####		MATLAB Related		####
+####################################
+
+# Workspace files
+*.mat
+
+####################################
+####		AFOTv2 Specific		####
+####################################
+
+# Generated/Downloaded Data
+airfoils/
+afdata/
