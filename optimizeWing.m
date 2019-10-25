@@ -210,7 +210,7 @@ fig.Position = [0, 0, 10, 10];
 
 %%%
 % 
-ax(1) = subplot(2,2,1);
+ax(1) = subplot(4,6,[4,5]);
 [~, c] = contourf(crange, brange, Lgrid, 1000);
 c.LineColor = 'none';
 title('Lift');
@@ -222,7 +222,7 @@ plot(copt, bopt, 'kx');
 contour(crange, brange, Lgrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
 hold off
 
-ax(2) = subplot(4,3,3);
+ax(2) = subplot(4,6, [11,12]);
 [~, c] = contourf(crange, brange, Dgrid, 1000);
 c.LineColor = 'none';
 title('Drag');
@@ -234,7 +234,7 @@ plot(copt, bopt, 'kx');
 contour(crange, brange, Dgrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
 hold off
 
-ax(3) = subplot(4,3,6);
+ax(3) = subplot(2,2,1);
 [~, c] = contourf(crange, brange, Egrid, 1000);
 c.LineColor = 'none';
 title('L/D');

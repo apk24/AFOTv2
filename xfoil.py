@@ -119,24 +119,28 @@ for a in xfrange(center - alphaStep, upperQuarter, alphaStep):
 	issueCmd('alfa ' + "{0:.3g}".format(a))
 	if(not stepCounter % 5):
 		issueCmd('init')
+time.sleep(10)
 
 issueCmd('init')
 for a in xfrange(center + alphaStep, lowerQuarter, alphaStep):
 	issueCmd('alfa ' + "{0:.3g}".format(a))
 	if(not stepCounter % 5):
 		issueCmd('init')
+time.sleep(10)
 
 issueCmd('init')
 for a in xfrange(upperQuarter - alphaStep, alphaEnd, alphaStep):
 	issueCmd('alfa ' + "{0:.3g}".format(a))
 	if(not stepCounter % 5):
 		issueCmd('init')
+time.sleep(10)
 
 issueCmd('init')
 for a in xfrange(lowerQuarter + alphaStep, alphaStart, alphaStep):
 	issueCmd('alfa ' + "{0:.3g}".format(a))
 	if(not stepCounter % 5):
 		issueCmd('init')
+time.sleep(10)
 
 time.sleep(5)
 issueCmd("pacc")
@@ -150,10 +154,10 @@ while(not os.path.isfile(outFile)):
 	time.sleep(1)
 
 
-while(not ps.poll() and (time.time()-os.path.getmtime(outFile)) < 120):
+while(not ps.poll() and (time.time()-os.path.getmtime(outFile)) < 90):
 	time.sleep(1)
 if(not ps.poll()):
-	log.warning("120 seconds have passed. Sending sigterm.")
+	log.warning("90 seconds since last filewrite. Sending sigterm.")
 	ps.terminate()
 
 try:

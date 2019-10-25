@@ -1,7 +1,7 @@
 
 afNames = ["naca4412-il"; "ch10sm-il"];
-crange = convlength(5:.1:10, 'in', 'm');
-brange = convlength(48:.1:54, 'in', 'm');
+crange = convlength(5:.1:9, 'in', 'm');
+brange = convlength(40:.1:47, 'in', 'm');
 cruiseVel = convvel(40, 'mph', 'm/s');
 weight = convforce(6, 'lbf', 'N');
 
