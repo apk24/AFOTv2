@@ -38,6 +38,7 @@ function [copt, bopt, ARopt, aoaOpt, Lopt, Dopt, Eopt, Mopt, fig] = optimizeWing
 %% Input Validation
 % Ensure all required inputs are provided. Parse optional inputs.
 narginchk(10, 12);
+global debug;
 
 %%%
 % If not provided, the output of |alphaAdjuster| should always be 0 and
@@ -106,7 +107,8 @@ futures(length(uniqRe)) = parallel.FevalFuture();
 % parallel pool. Currently using .1 degree increments for the airfoil data.
 for idx = 1:length(uniqRe)
     fprintf("Queueing %s at Re%g, M%g\n", afName, uniqRe(idx), cruiseVel/a);
-    futures(idx) = parfeval(pool, @createAirfoil, 1, afName, uniqRe(idx), cruiseVel/a, .1);
+    futures(idx) = parfeval(pool, @createAirfoil, 1, afName, uniqRe(idx), cruiseVel/a, .1, debug);
+%     airfoils(idx) = createAirfoil(afName, uniqRe(idx), cruiseVel/a, .1, debug);
 end
 
 %%%
@@ -116,16 +118,7 @@ for idx = 1:length(futures)
     airfoils(completedIdx) = value;
     fprintf("Completed %s at Re%g, M%g\t%d of %d\n", value.name, value.Re, value.mach, idx, length(futures));
 end
-
-%%%
-% Method based on parfor seems not to print status correctly
-%
-% parfor idx = 1:length(uniqRe)
-%     fprintf("Queueing %s at Re%g, M%g\n", afName, uniqRe(idx), cruiseVel/a);
-%     airfoils(idx) = createAirfoil(afName, uniqRe(idx), cruiseVel/a, .1);
-%     fprintf("Completed %s at Re%g, M%g\n", value.name, value.Re, value.mach);
-% end
-    
+%     
 
 %%%
 % Then, each point in the C grid is mapped to the appropriate airfoil in
@@ -213,25 +206,29 @@ fig.Position = [0, 0, 10, 10];
 ax(1) = subplot(4,6,[4,5]);
 [~, c] = contourf(crange, brange, Lgrid, 1000);
 c.LineColor = 'none';
-title('Lift');
+title('Lift (N)');
 xlim(xl);
 ylim(yl);
 colorbar
 hold on
 plot(copt, bopt, 'kx');
 contour(crange, brange, Lgrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
+xlabel('Chord (m)');
+ylabel('Span (m)');
 hold off
 
 ax(2) = subplot(4,6, [11,12]);
 [~, c] = contourf(crange, brange, Dgrid, 1000);
 c.LineColor = 'none';
-title('Drag');
+title('Drag (N)');
 xlim(xl);
 ylim(yl);
 colorbar
 hold on
 plot(copt, bopt, 'kx');
 contour(crange, brange, Dgrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
+xlabel('Chord (m)');
+ylabel('Span (m)');
 hold off
 
 ax(3) = subplot(2,2,1);
@@ -244,34 +241,38 @@ colorbar
 hold on
 plot(copt, bopt, 'kx');
 contour(crange, brange, Egrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
+xlabel('Chord (m)');
+ylabel('Span (m)');
 hold off
 
 ax(4) = subplot(2,2,3);
 [~, c] = contourf(crange, brange, Mgrid, 1000);
 c.LineColor = 'none';
-title('Moment');
+title('Moment (Nm)');
 xlim(xl);
 ylim(yl);
 colorbar
 hold on
 plot(copt, bopt, 'kx');
 contour(crange, brange, Mgrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
+xlabel('Chord (m)');
+ylabel('Span (m)');
 hold off
 
 ax(5) = subplot(2,2,4);
 [~, c] = contourf(crange, brange, aoaGrid, 1000);
 c.LineColor = 'none';
-title('\alpha');
+title('\alpha (deg)');
 xlim(xl);
 ylim(yl);
 colorbar
 hold on
 plot(copt, bopt, 'kx');
 contour(crange, brange, aoaGrid, 10, 'LineColor', 'black', 'LineStyle', '-.');
+xlabel('Chord (m)');
+ylabel('Span (m)');
 hold off
 
 suplabel(char(sprintf("Airfoil: '%s'", afName)), 't');
-suplabel('Chord', 'x');
-suplabel('Span', 'y');
 
 end

@@ -24,12 +24,8 @@ classdef AirfoilDataT < handle
         afDir = fullfile(".","airfoils",filesep);
     end
     methods (Access=private, Hidden)
-        function generateData(~, afFileName, Reynolds, machNumber, alphaStart, alphaEnd, alphaStep, datFileName)
-            global debug
-            if(isempty(debug) || ~debug)
-                debug = 0;
-            end
-            cmdStr = sprintf("python xfoil.py %s %0.0f %f %f %f %f %s %d", afFileName, Reynolds, machNumber, alphaStart, alphaEnd, alphaStep, datFileName, debug);
+        function generateData(~, afFileName, Reynolds, machNumber, alphaStart, alphaEnd, alphaStep, datFileName, debug)
+            cmdStr = sprintf("python xfoil.py %s %0.0f %f %f %f %f %s %d", afFileName, Reynolds, machNumber, alphaStart, alphaEnd, alphaStep, datFileName, ~~debug);
             fprintf("start '%s'\n", cmdStr);
             command = char(cmdStr);
             if(debug)
@@ -46,7 +42,7 @@ classdef AirfoilDataT < handle
         end
     end
     methods
-        function obj = AirfoilDataT(airfoilName, Reynolds, machNumber, alphaStep)
+        function obj = AirfoilDataT(airfoilName, Reynolds, machNumber, alphaStep, debug)
             if(nargin < 1)
                 return
             end
@@ -71,14 +67,14 @@ classdef AirfoilDataT < handle
                 end
                 assert(exist(afFileName, 'File') == 2, 'AirfoilData:AirfoilNotFound', 'Couldn''t find or open  airfoil named %s. Filename: %s', char(airfoilName), char(afFileName));
                 
-                obj.generateData(afFileName, Reynolds, machNumber, alphaStart, alphaEnd, alphaStep, obj.datFileName);
+                obj.generateData(afFileName, Reynolds, machNumber, alphaStart, alphaEnd, alphaStep, obj.datFileName, debug);
             end
             assert(exist(obj.datFileName, 'File') == 2, 'AirfoilData:DataFileNotFound', 'Couldn''t find or open  data file named: %s', char(obj.datFileName));
             tmpdata = obj.readData(obj.datFileName, alphaStart, alphaEnd, alphaStep);
             nudge = 1;
             while(size(tmpdata, 1) < (alphaEnd - alphaStart)/(alphaStep * 4) && nudge < 1.0005)
                 fprintf("Nudging: %d, %s\n", nudge, obj.datFileName);
-                obj.generateData(afFileName, Reynolds * nudge, machNumber * nudge, alphaStart, alphaEnd, alphaStep, obj.datFileName);
+                obj.generateData(afFileName, Reynolds * nudge, machNumber * nudge, alphaStart, alphaEnd, alphaStep, obj.datFileName, debug);
                 assert(exist(obj.datFileName, 'File') == 2, 'AirfoilData:DataFileNotFound', 'Couldn''t find or open  data file named: %s', char(obj.datFileName));
                 tmpdata = obj.readData(obj.datFileName, alphaStart, alphaEnd, alphaStep);
                 nudge = nudge + .0001;
