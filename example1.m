@@ -23,7 +23,7 @@ airDynVis = 1.778e-5; % Pa s
 % unit agnostic. However, it might be beneficial to use metric as the
 % resultant units are much easier to understand. 
 afNames = ["naca4412-il"];
-crange = convlength(5:.1:9, 'in', 'm');
+crange = convlength(7:.1:9, 'in', 'm');
 brange = convlength(40:.1:48, 'in', 'm');
 cruiseVel = convvel(40, 'mph', 'm/s');
 weight = convforce(7, 'lbf', 'N');
